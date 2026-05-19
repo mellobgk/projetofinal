@@ -83,3 +83,4 @@ Abra **http://127.0.0.1:5000** no navegador. Na primeira execução o banco SQLi
 - Comanda / pedidos integrados ao status da mesa.
 - Migração para PostgreSQL em produção.
 # projetofinal
+# projetofinal
