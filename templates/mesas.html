@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Mesas • MesaFlow{% endblock %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <h2>Gestão de mesas</h2>
+    <p class="muted">Cadastre, mude status e faça revezamento</p>
+  </div>
+  <button class="btn primary" onclick="document.getElementById('form-mesa').classList.toggle('hidden')">+ Nova mesa</button>
+</header>
+
+<form id="form-mesa" class="card form hidden" onsubmit="criarMesa(event)">
+  <label>Número <input type="number" name="numero" min="1" required></label>
+  <label>Capacidade <input type="number" name="capacidade" min="1" required></label>
+  <button class="btn primary" type="submit">Cadastrar</button>
+</form>
+
+<div class="grid-mesas" id="grid-mesas"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function refresh() {
+    const mesas = await fetch('/api/mesas').then(r => r.json());
+    window._mesas = mesas;
+    document.getElementById('grid-mesas').innerHTML =
+      mesas.map(m => MesaFlow.renderCard(m, true)).join('');
+  }
+  async function criarMesa(e) {
+    e.preventDefault();
+    const f = e.target;
+    const r = await fetch('/api/mesas', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({numero: f.numero.value, capacidade: f.capacidade.value})
+    });
+    const data = await r.json();
+    if (!r.ok) return alert(data.erro || 'Erro');
+    f.reset();
+    f.classList.add('hidden');
+    refresh();
+  }
+  refresh();
+  setInterval(refresh, 5000);
+</script>
+{% endblock %}

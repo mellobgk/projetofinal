@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Dashboard • MesaFlow{% endblock %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <h2>Dashboard</h2>
+    <p class="muted">Visão geral em tempo real do salão</p>
+  </div>
+</header>
+
+<section class="stats" id="stats">
+  <div class="stat"><span class="label">Livres</span><span class="value" id="stat-livre">–</span></div>
+  <div class="stat"><span class="label">Ocupadas</span><span class="value" id="stat-ocupada">–</span></div>
+  <div class="stat"><span class="label">Reservadas</span><span class="value" id="stat-reservada">–</span></div>
+  <div class="stat"><span class="label">Em limpeza</span><span class="value" id="stat-limpeza">–</span></div>
+  <div class="stat"><span class="label">Na fila</span><span class="value" id="stat-fila">–</span></div>
+</section>
+
+<section>
+  <h3>Mesas</h3>
+  <div class="grid-mesas" id="grid-mesas"></div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Atualiza dashboard a cada 5 segundos (atualização dinâmica)
+  async function refresh() {
+    const [mesas, fila] = await Promise.all([
+      fetch('/api/mesas').then(r => r.json()),
+      fetch('/api/fila').then(r => r.json()),
+    ]);
+    const count = s => mesas.filter(m => m.status === s).length;
+    stat_livre.textContent     = count('livre');
+    stat_ocupada.textContent   = count('ocupada');
+    stat_reservada.textContent = count('reservada');
+    stat_limpeza.textContent   = count('limpeza');
+    stat_fila.textContent      = fila.length;
+    document.getElementById('grid-mesas').innerHTML =
+      mesas.map(MesaFlow.renderCard).join('');
+  }
+  refresh();
+  setInterval(refresh, 5000);
+</script>
+{% endblock %}

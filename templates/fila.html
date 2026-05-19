@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Fila • MesaFlow{% endblock %}
+{% block content %}
+<header class="page-header">
+  <div>
+    <h2>Fila de espera</h2>
+    <p class="muted">Chame o próximo e aloque automaticamente em uma mesa livre</p>
+  </div>
+  <button class="btn primary" onclick="chamarProximo()">Chamar próximo</button>
+</header>
+
+<form class="card form" onsubmit="adicionar(event)">
+  <label>Nome <input name="nome" required></label>
+  <label>Pessoas <input type="number" name="pessoas" min="1" required></label>
+  <button class="btn" type="submit">Adicionar à fila</button>
+</form>
+
+<div class="card">
+  <table class="tabela">
+    <thead><tr><th>#</th><th>Cliente</th><th>Pessoas</th><th>Espera</th><th></th></tr></thead>
+    <tbody id="tbody-fila"></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function refresh() {
+    const fila = await fetch('/api/fila').then(r => r.json());
+    document.getElementById('tbody-fila').innerHTML = fila.map((c, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${c.nome}</td>
+        <td>${c.pessoas}</td>
+        <td>${c.espera_min} min</td>
+        <td><button class="btn ghost" onclick="remover(${c.id})">Remover</button></td>
+      </tr>`).join('') || '<tr><td colspan="5" class="muted">Fila vazia</td></tr>';
+  }
+  async function adicionar(e) {
+    e.preventDefault();
+    const f = e.target;
+    await fetch('/api/fila', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({nome: f.nome.value, pessoas: f.pessoas.value})
+    });
+    f.reset();
+    refresh();
+  }
+  async function remover(id) {
+    await fetch('/api/fila/' + id, {method: 'DELETE'});
+    refresh();
+  }
+  async function chamarProximo() {
+    const r = await fetch('/api/fila/proximo', {method: 'POST'});
+    const data = await r.json();
+    if (!r.ok) return alert(data.erro || 'Erro');
+    if (data.mesa) alert(`${data.cliente.nome} alocado na Mesa ${data.mesa.numero}`);
+    else alert(`Nenhuma mesa livre comporta ${data.cliente.pessoas} pessoa(s). Cliente segue na fila.`);
+    refresh();
+  }
+  refresh();
+  setInterval(refresh, 5000);
+</script>
+{% endblock %}

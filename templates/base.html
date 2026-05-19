@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}MesaFlow{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="logo">▣</span>
+      <div>
+        <h1>MesaFlow</h1>
+        <small>Gestão de mesas</small>
+      </div>
+    </div>
+    <nav>
+      <a href="/"       class="{{ 'active' if active=='dashboard' }}">Dashboard</a>
+      <a href="/mesas"  class="{{ 'active' if active=='mesas' }}">Mesas</a>
+      <a href="/fila"   class="{{ 'active' if active=='fila' }}">Fila de espera</a>
+    </nav>
+    <footer>v1.0 • Projeto acadêmico ADS</footer>
+  </aside>
+
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
